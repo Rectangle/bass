@@ -13,7 +13,8 @@ import { Tomdrum } from 'Rectangle/drums';
 var bpm = 120;
 
 
-var my_string_harmonics = [1, 0.8, 0.9, 0.8, 0, 0, 0, 0, 0.1, 0, 0.2, 0];
+var my_string_harmonics = [1, 0.8, 1.5, 0.8, 0, 0, 0, 2, 0.1, 0, 0.2, 0];
+var my_string_overtones = [0, 0, 0, 0, 0, 0, 0.1, 2, 1.1, 1.4, 0.8, 3, 0.8, 1, 0.8, 4];
 
 
 export function String(harmonic_amps, decay, base_amp){
@@ -26,10 +27,6 @@ export function String(harmonic_amps, decay, base_amp){
   var sustain = 0;
   
   return{
-    
-    set_decay : function (d){
-      decay = d;
-    },
     
     hit : function (freq, len, vel) {
       t = 0;
@@ -45,13 +42,16 @@ export function String(harmonic_amps, decay, base_amp){
       }
       
       
-      for (var i = 0; i < 4; i++){
+      for (var i = 0; i < harmonic_amps.length; i++){
         w += Math.pow(-1,i) * v * Math.cos(2 * Math.PI * f * (i+1) * t) * harmonic_amps[i] * (2 * Math.PI * f) / (i+1) / sampleRate;
       }
       
-      while (t > sustain){
+      if (t > sustain){
         w *= (1 - decay/sampleRate);
         v *= (1 - decay/sampleRate);
+      } else {
+        w *= (1 - 5/sampleRate);
+        v *= (1 - 5/sampleRate);
       }
       
       t += 1/sampleRate;
@@ -62,8 +62,20 @@ export function String(harmonic_amps, decay, base_amp){
 }
 
 
-var bass = String(my_string_harmonics, 50, 0.6);
-
+var bass = {
+  string : String(my_string_harmonics, 50, 0.6),
+  string_overtones : String(my_string_overtones, 50, 5),
+  
+  hit : function (freq, len, vel) {
+    this.string.hit(freq, len, vel);
+    this.string_overtones.hit(freq, 0, vel);
+  },
+  
+  play : function(){
+    
+    return this.string.play() + this.string_overtones.play();
+  }
+};
 
 
 var bassdrum = Bassdrum(55, 30, 2, 0.05, 3);
@@ -122,17 +134,43 @@ export function dsp(t) {
   var beatlen = 60/bpm;
   
   
-  if (each(beats, 0, 1)) bass.hit(55, 0.5*beatlen, 1.0);
+  if (each(beats, 0, 4)) bass.hit(55, 0.5*beatlen, 0.6);
+  if (each(beats, 0.75, 4)) bass.hit(55, 0.25*beatlen, 0.6);
+  if (each(beats, 1, 4)) bass.hit(55*Math.pow(2,9/12), 0.5*beatlen, 0.6);
+  if (each(beats, 1.5, 4)) bass.hit(55*Math.pow(2,7/12), 0.5*beatlen, 0.6);
   
   
-  if (each(beats,0, 0.5)) bassdrum.hit(1);
-  if (each(beats,1, 2)) snare.hit(1);
-  if (each(beats,0, 0.5)) hihat.hit(1);
-  if (each(beats,0.25, 0.5)) hihat.hit(0.2);
+  if (each(beats, 2, 4)) bass.hit(55, 0.25*beatlen, 0.6);
+  if (each(beats, 2.5, 4)) bass.hit(55, 0.5*beatlen, 0.6);
+  if (each(beats, 3, 4)) bass.hit(55*Math.pow(2,3/12), 0.25*beatlen, 0.6);
+  if (each(beats, 3.25, 4)) bass.hit(55*Math.pow(2,5/12), 0.25*beatlen, 0.6);
+  if (each(beats, 3.5, 4)) bass.hit(55*Math.pow(2,10/12), 0.5*beatlen, 0.6);
   
-  var drums_output
+  
+      if (each(beats,0,4)) bassdrum.hit(1);
+      if (each(beats,0.5,4)) bassdrum.hit(1);
+      if (each(beats,1,4)) snare.hit(1);
+      
+      
+      if (each(beats,2.25,4)) snare.hit(0.8);
+      if (each(beats,2.5,4)) bassdrum.hit(1);
+      
+      if (each(beats,2.75,4)) snare.hit(0.5);
+      
+      if (each(beats,6+3/4+1/8,8)) snare.hit(0.5);
+      if (each(beats,6+3/4+1/8+1/16,8)) snare.hit(0.5);
+      
+      if (each(beats,3,4)) snare.hit(0.4);
+      if (each(beats,3.25,4)) bassdrum.hit(1);
+      if (each(beats,3.5,4)) snare.hit(0.7);
+      
+      if (each(beats,0,0.25)) hihat.hit(1);
+      
+  
+  var drums_output = drums.play();
+  drums_output = (drums_output[0] + drums_output[1])/2;
   var bass_output = bass.play();
-  var output = bass_output;
+  var output = bass_output + drums_output*0.8;
   
   return output;
 }
