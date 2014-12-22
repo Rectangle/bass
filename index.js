@@ -13,8 +13,30 @@ import { Tomdrum } from 'Rectangle/drums';
 var bpm = 120;
 
 
-var my_string_harmonics = [1, 0.8, 1.5, 0.8, 0, 0, 0, 2, 0.1, 0, 0.2, 0];
-var my_string_overtones = [0, 0, 0, 0, 0, 0, 0.1, 2, 1.1, 1.4, 0.8, 3, 0.8, 1, 0.8, 4];
+var my_string_harmonics = {
+  1  : 1.0,
+  2  : 0.6,
+  3  : 0.7,
+  4  : 0.5,
+  
+  9  : 0.1,
+  10 : 0.2,
+  11 : 0.4,
+  12 : 0.1,
+  13 : 0.3,
+  14 : 0.05,
+  15 : 0.3,
+  16 : 0.2,
+  17 : 0.1,
+  18 : 0.02,
+  19 : 0.01,
+  
+};
+
+
+
+
+[1, 0.8, 1, 1.6, 0, 0, 1.0, 3.3, 4.2, 2.5, 3.2, 3.3, 1.8, 2.6, 1.4, 0.8, 0.2];
 
 
 export function String(harmonic_amps, decay, base_amp){
@@ -42,8 +64,8 @@ export function String(harmonic_amps, decay, base_amp){
       }
       
       
-      for (var i = 0; i < harmonic_amps.length; i++){
-        w += Math.pow(-1,i) * v * Math.cos(2 * Math.PI * f * (i+1) * t) * harmonic_amps[i] * (2 * Math.PI * f) / (i+1) / sampleRate;
+      for (var i in my_string_harmonics){
+        w += Math.pow(-1,i) * v * Math.cos(2 * Math.PI * f * i * t) * harmonic_amps[i] * (2 * Math.PI * f) / sampleRate;
       }
       
       if (t > sustain){
@@ -62,20 +84,7 @@ export function String(harmonic_amps, decay, base_amp){
 }
 
 
-var bass = {
-  string : String(my_string_harmonics, 50, 0.6),
-  string_overtones : String(my_string_overtones, 50, 5),
-  
-  hit : function (freq, len, vel) {
-    this.string.hit(freq, len, vel);
-    this.string_overtones.hit(freq, 0, vel);
-  },
-  
-  play : function(){
-    
-    return this.string.play() + this.string_overtones.play();
-  }
-};
+var bass = String(my_string_harmonics, 50, 0.6);
 
 
 var bassdrum = Bassdrum(55, 30, 2, 0.05, 3);
