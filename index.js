@@ -30,6 +30,7 @@ var my_string_harmonics = {
   17 : 0.1,
   18 : 0.02,
   19 : 0.01,
+  20 : 0.005
   
 };
 
@@ -65,7 +66,10 @@ export function String(harmonic_amps, decay, base_amp){
       
       
       for (var i in my_string_harmonics){
-        w += Math.pow(-1,i) * v * Math.cos(2 * Math.PI * f * i * t) * harmonic_amps[i] * (2 * Math.PI * f) / sampleRate;
+        
+        
+        
+        w += Math.pow(-1,Math.floor(i)) * v * Math.cos(2 * Math.PI * f * i * t) * harmonic_amps[i] * (2 * Math.PI * f) / sampleRate;
       }
       
       if (t > sustain){
