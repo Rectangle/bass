@@ -149,7 +149,7 @@ export function dsp(t) {
   
   if (each(beats, 0, 4)) bass.hit(55, 0.5*beatlen, 0.6);
   if (each(beats, 0.75, 4)) bass.hit(55, 0.25*beatlen, 0.6);
-  if (each(beats, 1, 4)) bass.hit(55*Math.pow(2,9/12), 0.5*beatlen, 0.6);
+  
   if (each(beats, 1.5, 4)) bass.hit(55*Math.pow(2,7/12), 0.5*beatlen, 0.6);
   
   
@@ -162,15 +162,18 @@ export function dsp(t) {
   
       if (each(beats,0,4)) bassdrum.hit(1);
       if (each(beats,0.5,4)) bassdrum.hit(1);
-      if (each(beats,1,4)) snare.hit(1);
+      if (each(beats,0.75,8)) bassdrum.hit(1);
+      if (each(beats,1,8)) snare.hit(1);
+      if (each(beats,4.75,8)) snare.hit(1);
       
+      if (each(beats,1.5,4)) bassdrum.hit(1);
+      if (each(beats,2,4)) bassdrum.hit(1);
       
       if (each(beats,2.25,4)) snare.hit(0.8);
       if (each(beats,2.5,4)) bassdrum.hit(1);
       
       if (each(beats,2.75,4)) snare.hit(0.5);
       
-      if (each(beats,6+3/4+1/8,8)) snare.hit(0.5);
       if (each(beats,6+3/4+1/8+1/16,8)) snare.hit(0.5);
       
       if (each(beats,3,4)) snare.hit(0.4);
